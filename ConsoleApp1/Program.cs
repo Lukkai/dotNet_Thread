@@ -48,7 +48,7 @@ namespace ConsoleApp1
         public int id { set; get; }
         public Weather[] weather { set; get; }
         public Coord coord { set; get; }
-        public MainWeather mainn { set; get; }
+        public MainWeather main { set; get; }
         public Wind wind { set; get; }
 
         public string GetWeather()
@@ -72,19 +72,18 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             CityWeather cityWeather = new CityWeather();
-            cityWeather.name = "Wroclaw";            
+            cityWeather.name = "Caio";            
             Console.WriteLine(cityWeather.GetWeather());
             
             CityWeather distinctedWeatherInfo = JsonConvert.DeserializeObject<CityWeather>(cityWeather.GetWeather());
-            //MACIEJ NIE DZIALAAAAA;-;-;-;-;-;-;-;
-            //EDIT, POWINNO JUZ DZIALAC AAAAAAAAAA, TERAZ POTRZEBUJEMY TYLKO MIEC AKTYWOWANY KLUCZ API <3<3
 
             Console.WriteLine("City: " + distinctedWeatherInfo.name);
             Console.WriteLine("Latitude: " + distinctedWeatherInfo.coord.lat);
             //Console.WriteLine(distinctedWeatherInfo.weather);
             Console.WriteLine("ID: " + distinctedWeatherInfo.weather[0].id);
-            Console.WriteLine("Temperature :" + distinctedWeatherInfo.mainn.temp);
-            Console.WriteLine("Feels like :" + distinctedWeatherInfo.mainn.feels_like);
+            Console.WriteLine("Temperature :" + distinctedWeatherInfo.main.temp);
+            Console.WriteLine("Feels like :" + distinctedWeatherInfo.main.feels_like);
+            
             Console.Read();
         }
     }
