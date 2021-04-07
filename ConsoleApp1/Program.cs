@@ -7,6 +7,7 @@ using System.IO;
 using Newtonsoft.Json;
 using System.Data.Entity;
 using System.Net;
+using System.Threading;
 
 namespace ConsoleApp1
 {
@@ -16,14 +17,6 @@ namespace ConsoleApp1
         public float lat { set; get; }
     }
 
-
-    public class Weather
-    {
-        public int id { set; get; }
-        public string tag { set; get; }
-        public string description { set; get; }
-
-    }
 
     public class MainWeather
     {
@@ -46,7 +39,6 @@ namespace ConsoleApp1
         public string name { set; get; }
         public int timeZone { set; get; }
         public int id { set; get; }
-        public Weather[] weather { set; get; }
         public Coord coord { set; get; }
         public MainWeather main { set; get; }
         public Wind wind { set; get; }
@@ -55,10 +47,19 @@ namespace ConsoleApp1
         {
             using (WebClient webClient = new WebClient())
             {
-                string call = string.Format("https://api.openweathermap.org/data/2.5/weather?q=" + name + "&appid=9e78fe82c3c763872a651f2affb0f808");                
+                string call = string.Format("https://api.openweathermap.org/data/2.5/weather?q=" + name + "&appid=9e78fe82c3c763872a651f2affb0f808");
                 var json = webClient.DownloadString(call);
                 return json;
             }
+        }
+
+        public void ShowWeather()
+        {
+            Console.WriteLine($"Cities: {name}");
+            Console.WriteLine("Latitude: " + coord.lat);
+            Console.WriteLine("Temperature :" + main.temp);
+            Console.WriteLine("Feels like :" + main.feels_like);
+            Console.WriteLine($"Wind speed: {wind.speed}, wind degree direction: {wind.deg}");
         }
     }
 
@@ -79,13 +80,45 @@ namespace ConsoleApp1
             var citiesWeather = (from a in this.CitiesWeather select a).ToList<CityWeather>();
             foreach (var cw in citiesWeather)
             {
-                Console.WriteLine($"Cities: {cw.name}");
+                cw.ShowWeather();
+                Console.WriteLine("");
             }
         }
 
         public void ClearBase()
         {
             CitiesWeather.RemoveRange(CitiesWeather);
+            this.SaveChanges();
+        }
+
+        public void RemoveLast()
+        {
+            var cs = CitiesWeather.First<CityWeather>();
+            CitiesWeather.Remove(cs);
+            this.SaveChanges();
+        }
+
+        public void FindByTemp(int searched_temp)
+        {
+            //var query = (from city in this.CitiesWeather
+            //             where city.main.temp == searched_temp
+            //             select city).ToList<CityWeather>();
+            var foundcities = this.CitiesWeather.Where(city => city.main.temp >= searched_temp).ToList<CityWeather>();
+            foreach (var cw in foundcities)
+            {
+                cw.ShowWeather();
+                Console.WriteLine("");
+            }
+        }
+
+        public void FindByWindSpeed(int searched_wind_speed)
+        {
+            var foundcities = this.CitiesWeather.Where(city => city.wind.speed >= searched_wind_speed).ToList<CityWeather>();
+            foreach (var cw in foundcities)
+            {
+                cw.ShowWeather();
+                Console.WriteLine("");
+            }
         }
     }
 
@@ -94,28 +127,129 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
 
-            var cityWeatherBase = new WeatherBase();
-            //var cs = cityWeatherBase.CitiesWeather.First<CityWeather>();
-            //cityWeatherBase.CitiesWeather.Remove(cs);
-            //cityWeatherBase.CitiesWeather.RemoveRange(cityWeatherBase.CitiesWeather); //truncates whole table
-            cityWeatherBase.ClearBase();
-            //cityWeatherBase.CitiesWeather.Add(cityWeatherBase.AddDataToBase("Olawa"));
-            cityWeatherBase.SaveChanges();
-            cityWeatherBase.ShowDataBaseContent();
-            //Console.WriteLine("Latitude: " + cityWeatherBase.coord.lat);
-            ////Console.WriteLine(cityWeatherBase.weather);
-            //Console.WriteLine("ID: " + cityWeatherBase.weather[0].id);
-            //Console.WriteLine("Temperature :" + cityWeatherBase.main.temp);
-            //Console.WriteLine("Feels like :" + cityWeatherBase.main.feels_like);
+            /*
+             * 
+    do 
+    {
+    line = input.ReadLine();
 
-            Console.Read();
+    if (line == null)
+    {
+    return;
+    }
+
+    if (line == String.Empty)
+    {
+    continue;
+    }
+
+    // Here you process the non-empty line
+
+    } while (true);
+            */
+
+            var cityWeatherBase = new WeatherBase();
+            //int key;
+            //string line;
+
+            // cityWeatherBase.CitiesWeather.Add(cityWeatherBase.AddDataToBase("Olawa"));
+            // cityWeatherBase.SaveChanges();
+            // cityWeatherBase.ShowDataBaseContent();
+
+
+            
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("1. Add new city");
+                Console.WriteLine("2. Clear whole database");
+                Console.WriteLine("3. Show whole content");
+                Console.WriteLine("4. Remove last added element");
+                Console.WriteLine("5. Find elements by temperature");
+                Console.WriteLine("6. Find elements by wind speed");
+                Console.WriteLine("7. Menu");
+                Console.WriteLine("8. Exit");
+                Console.WriteLine("Chose one option");
+
+            } while (MainMenu(cityWeatherBase));
+            //while (MainMenu((int)Convert.ToDecimal(Console.ReadLine()), cityWeatherBase));
+            //{
+            //    Console.Clear();
+            //    MainMenu(7, cityWeatherBase);
+            //}
+        }
+        static bool MainMenu(WeatherBase cityWeatherBase)
+        {
+            
+            switch (Console.ReadLine())
+            {
+                case "0":
+                    return true;
+                case "1":
+                    Console.WriteLine("Insert name of the city:");
+                    cityWeatherBase.CitiesWeather.Add(cityWeatherBase.AddDataToBase(Console.ReadLine()));
+                    cityWeatherBase.SaveChanges();
+                    return true;
+                case "2":
+                    cityWeatherBase.ClearBase();
+                    Console.WriteLine("Base Cleared");
+                    Console.ReadLine();
+                    return true;
+                case "3":
+                    cityWeatherBase.ShowDataBaseContent();
+                    Console.ReadLine();
+                    return true;
+                case "7":
+                    Console.Clear();
+                    Console.WriteLine("1. Add new city");
+                    Console.WriteLine("2. Clear whole database");
+                    Console.WriteLine("3. Show whole content");
+                    Console.WriteLine("4. Remove last added element");
+                    Console.WriteLine("5. Find elements by temperature");
+                    Console.WriteLine("6. Find elements by wind speed");
+                    Console.WriteLine("7. Menu");
+                    Console.WriteLine("8. Exit");
+                    Console.WriteLine("Chose one option");
+                    return true;
+
+                case "4":
+                    cityWeatherBase.RemoveLast();
+                    Console.WriteLine("Element removed");
+                    Console.ReadLine();
+                    return true;
+
+                case "5":
+                    Console.WriteLine("Insert the temperature: ");
+                    cityWeatherBase.FindByTemp(Convert.ToInt32(Console.ReadLine()));
+                    
+                    Console.WriteLine("Press any key to return");
+                    Console.ReadLine();
+                    return true;
+
+                case "6":
+                    Console.WriteLine("Insert the wind speed: ");
+                    cityWeatherBase.FindByWindSpeed(Convert.ToInt32(Console.ReadLine()));
+                    Console.WriteLine("Press any key to return");
+                    Console.ReadLine();
+                    return true;
+
+                case "8":
+                    return false;
+
+                default:
+                    Console.WriteLine("Error: option not found");
+                    Console.WriteLine("\nPress any key to return");
+                    Console.ReadLine();
+                    return true;
+            }
+
+
         }
 
-        
     }
 }
 
 
 
- //cityWeatherBase.CitiesWeather.RemoveRange(cityWeatherBase.CitiesWeather); //truncates whole table
-            //cityWeatherBase.SaveChanges();
+//cityWeatherBase.CitiesWeather.RemoveRange(cityWeatherBase.CitiesWeather); //truncates whole table
+//cityWeatherBase.SaveChanges();
