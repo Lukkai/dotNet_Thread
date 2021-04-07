@@ -65,26 +65,57 @@ namespace ConsoleApp1
     public class WeatherBase : DbContext
     {
         public virtual DbSet<CityWeather> CitiesWeather { get; set; }
+
+        public CityWeather AddDataToBase(string cityName)
+        {
+            var cityWeather = new CityWeather();
+            cityWeather.name = cityName;
+            cityWeather = JsonConvert.DeserializeObject<CityWeather>(cityWeather.GetWeather());
+            return cityWeather;
+        }
+
+        public void ShowDataBaseContent()
+        {
+            var citiesWeather = (from a in this.CitiesWeather select a).ToList<CityWeather>();
+            foreach (var cw in citiesWeather)
+            {
+                Console.WriteLine($"Cities: {cw.name}");
+            }
+        }
+
+        public void ClearBase()
+        {
+            CitiesWeather.RemoveRange(CitiesWeather);
+        }
     }
 
     public class Program
     {
         static void Main(string[] args)
         {
-            CityWeather cityWeather = new CityWeather();
-            cityWeather.name = "Caio";            
-            Console.WriteLine(cityWeather.GetWeather());
-            
-            CityWeather distinctedWeatherInfo = JsonConvert.DeserializeObject<CityWeather>(cityWeather.GetWeather());
 
-            Console.WriteLine("City: " + distinctedWeatherInfo.name);
-            Console.WriteLine("Latitude: " + distinctedWeatherInfo.coord.lat);
-            //Console.WriteLine(distinctedWeatherInfo.weather);
-            Console.WriteLine("ID: " + distinctedWeatherInfo.weather[0].id);
-            Console.WriteLine("Temperature :" + distinctedWeatherInfo.main.temp);
-            Console.WriteLine("Feels like :" + distinctedWeatherInfo.main.feels_like);
-            
+            var cityWeatherBase = new WeatherBase();
+            //var cs = cityWeatherBase.CitiesWeather.First<CityWeather>();
+            //cityWeatherBase.CitiesWeather.Remove(cs);
+            //cityWeatherBase.CitiesWeather.RemoveRange(cityWeatherBase.CitiesWeather); //truncates whole table
+            cityWeatherBase.ClearBase();
+            //cityWeatherBase.CitiesWeather.Add(cityWeatherBase.AddDataToBase("Olawa"));
+            cityWeatherBase.SaveChanges();
+            cityWeatherBase.ShowDataBaseContent();
+            //Console.WriteLine("Latitude: " + cityWeatherBase.coord.lat);
+            ////Console.WriteLine(cityWeatherBase.weather);
+            //Console.WriteLine("ID: " + cityWeatherBase.weather[0].id);
+            //Console.WriteLine("Temperature :" + cityWeatherBase.main.temp);
+            //Console.WriteLine("Feels like :" + cityWeatherBase.main.feels_like);
+
             Console.Read();
         }
+
+        
     }
 }
+
+
+
+ //cityWeatherBase.CitiesWeather.RemoveRange(cityWeatherBase.CitiesWeather); //truncates whole table
+            //cityWeatherBase.SaveChanges();
