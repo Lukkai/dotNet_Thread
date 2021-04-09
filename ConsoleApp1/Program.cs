@@ -81,6 +81,7 @@ namespace ConsoleApp1
             foreach (var cw in citiesWeather)
             {
                 cw.ShowWeather();
+                //Console.WriteLine($"Id: {cw.id}");
                 Console.WriteLine("");
             }
         }
@@ -93,8 +94,13 @@ namespace ConsoleApp1
 
         public void RemoveLast()
         {
-            var cs = CitiesWeather.First<CityWeather>();
-            CitiesWeather.Remove(cs);
+            //var cs = CitiesWeather.First<CityWeather>();
+            //var lastUser = CitiesWeather.Select(g => g.id).Max();
+            var last = CitiesWeather.OrderByDescending(g => g.id)
+                       .Take(1);
+
+            CitiesWeather.RemoveRange(last);
+            //CitiesWeather.Remove(cs);
             this.SaveChanges();
         }
 
@@ -157,7 +163,7 @@ namespace ConsoleApp1
             // cityWeatherBase.ShowDataBaseContent();
 
 
-            
+
             do
             {
                 Console.Clear();
@@ -180,7 +186,7 @@ namespace ConsoleApp1
         }
         static bool MainMenu(WeatherBase cityWeatherBase)
         {
-            
+
             switch (Console.ReadLine())
             {
                 case "0":
@@ -197,6 +203,7 @@ namespace ConsoleApp1
                     return true;
                 case "3":
                     cityWeatherBase.ShowDataBaseContent();
+                    Console.WriteLine("Press enter to return");
                     Console.ReadLine();
                     return true;
                 case "7":
@@ -215,21 +222,22 @@ namespace ConsoleApp1
                 case "4":
                     cityWeatherBase.RemoveLast();
                     Console.WriteLine("Element removed");
+                    Console.WriteLine("Press enter to return");
                     Console.ReadLine();
                     return true;
 
                 case "5":
                     Console.WriteLine("Insert the temperature: ");
                     cityWeatherBase.FindByTemp(Convert.ToInt32(Console.ReadLine()));
-                    
-                    Console.WriteLine("Press any key to return");
+
+                    Console.WriteLine("Press enter to return");
                     Console.ReadLine();
                     return true;
 
                 case "6":
                     Console.WriteLine("Insert the wind speed: ");
                     cityWeatherBase.FindByWindSpeed(Convert.ToInt32(Console.ReadLine()));
-                    Console.WriteLine("Press any key to return");
+                    Console.WriteLine("Press enter to return");
                     Console.ReadLine();
                     return true;
 
@@ -238,7 +246,7 @@ namespace ConsoleApp1
 
                 default:
                     Console.WriteLine("Error: option not found");
-                    Console.WriteLine("\nPress any key to return");
+                    Console.WriteLine("\nPress enter to return");
                     Console.ReadLine();
                     return true;
             }
@@ -248,8 +256,3 @@ namespace ConsoleApp1
 
     }
 }
-
-
-
-//cityWeatherBase.CitiesWeather.RemoveRange(cityWeatherBase.CitiesWeather); //truncates whole table
-//cityWeatherBase.SaveChanges();
