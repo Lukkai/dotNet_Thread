@@ -1,4 +1,2 @@
-# WeatherStation
-Basic WeatherStation using API, JSON and EntityFramework
-
-Parameter: city
+# ASP Webpage WeatherStation
+Repository for dotnet lab course. We build our first ASP Web page for our previously created WeatherStation app.
