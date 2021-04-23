@@ -53,6 +53,8 @@ namespace ConsoleApp1
             }
         }
 
+
+
         public void ShowWeather()
         {
             Console.WriteLine($"Cities: {name}");
@@ -61,8 +63,8 @@ namespace ConsoleApp1
             Console.WriteLine("Feels like :" + main.feels_like);
             Console.WriteLine($"Wind speed: {wind.speed}, wind degree direction: {wind.deg}");
         }
-    }
 
+    }
     public class WeatherBase : DbContext
     {
         public virtual DbSet<CityWeather> CitiesWeather { get; set; }
@@ -81,9 +83,11 @@ namespace ConsoleApp1
             foreach (var cw in citiesWeather)
             {
                 cw.ShowWeather();
-                //Console.WriteLine($"Id: {cw.id}");
+                Console.WriteLine($"Id: {cw.id}");
                 Console.WriteLine("");
             }
+
+
         }
 
         public void ClearBase()
@@ -94,27 +98,23 @@ namespace ConsoleApp1
 
         public void RemoveLast()
         {
-            //var cs = CitiesWeather.First<CityWeather>();
-            //var lastUser = CitiesWeather.Select(g => g.id).Max();
             var last = CitiesWeather.OrderByDescending(g => g.id)
-                       .Take(1);
+                   .Take(1);
 
             CitiesWeather.RemoveRange(last);
-            //CitiesWeather.Remove(cs);
             this.SaveChanges();
+
         }
 
         public void FindByTemp(int searched_temp)
         {
-            //var query = (from city in this.CitiesWeather
-            //             where city.main.temp == searched_temp
-            //             select city).ToList<CityWeather>();
             var foundcities = this.CitiesWeather.Where(city => city.main.temp >= searched_temp).ToList<CityWeather>();
             foreach (var cw in foundcities)
             {
                 cw.ShowWeather();
                 Console.WriteLine("");
             }
+
         }
 
         public void FindByWindSpeed(int searched_wind_speed)
@@ -127,42 +127,18 @@ namespace ConsoleApp1
             }
         }
     }
+    
+
 
     public class Program
     {
+        const int n = 8;
         static void Main(string[] args)
         {
 
-            /*
-             * 
-    do 
-    {
-    line = input.ReadLine();
 
-    if (line == null)
-    {
-    return;
-    }
-
-    if (line == String.Empty)
-    {
-    continue;
-    }
-
-    // Here you process the non-empty line
-
-    } while (true);
-            */
 
             var cityWeatherBase = new WeatherBase();
-            //int key;
-            //string line;
-
-            // cityWeatherBase.CitiesWeather.Add(cityWeatherBase.AddDataToBase("Olawa"));
-            // cityWeatherBase.SaveChanges();
-            // cityWeatherBase.ShowDataBaseContent();
-
-
 
             do
             {
@@ -178,14 +154,14 @@ namespace ConsoleApp1
                 Console.WriteLine("Chose one option");
 
             } while (MainMenu(cityWeatherBase));
-            //while (MainMenu((int)Convert.ToDecimal(Console.ReadLine()), cityWeatherBase));
-            //{
-            //    Console.Clear();
-            //    MainMenu(7, cityWeatherBase);
-            //}
+
         }
         static bool MainMenu(WeatherBase cityWeatherBase)
         {
+            Thread[] threads = new Thread[1];
+
+
+
 
             switch (Console.ReadLine())
             {
@@ -193,16 +169,21 @@ namespace ConsoleApp1
                     return true;
                 case "1":
                     Console.WriteLine("Insert name of the city:");
-                    cityWeatherBase.CitiesWeather.Add(cityWeatherBase.AddDataToBase(Console.ReadLine()));
+                    string name = Console.ReadLine();
+                    cityWeatherBase.CitiesWeather.Add(cityWeatherBase.AddDataToBase(name));
                     cityWeatherBase.SaveChanges();
                     return true;
                 case "2":
-                    cityWeatherBase.ClearBase();
+                    threads[0] = new Thread(cityWeatherBase.ClearBase);
+                    threads[0].Start();
+                    threads[0].Join();
                     Console.WriteLine("Base Cleared");
                     Console.ReadLine();
                     return true;
                 case "3":
-                    cityWeatherBase.ShowDataBaseContent();
+                    threads[0] = new Thread(cityWeatherBase.ShowDataBaseContent);
+                    threads[0].Start();
+                    threads[0].Join();
                     Console.WriteLine("Press enter to return");
                     Console.ReadLine();
                     return true;
@@ -220,7 +201,9 @@ namespace ConsoleApp1
                     return true;
 
                 case "4":
-                    cityWeatherBase.RemoveLast();
+                    threads[0] = new Thread(cityWeatherBase.RemoveLast);
+                    threads[0].Start();
+                    threads[0].Join();
                     Console.WriteLine("Element removed");
                     Console.WriteLine("Press enter to return");
                     Console.ReadLine();
@@ -228,15 +211,18 @@ namespace ConsoleApp1
 
                 case "5":
                     Console.WriteLine("Insert the temperature: ");
-                    cityWeatherBase.FindByTemp(Convert.ToInt32(Console.ReadLine()));
-
+                    threads[0] = new Thread(() => cityWeatherBase.FindByTemp(Convert.ToInt32(Console.ReadLine())));
+                    threads[0].Start();
+                    threads[0].Join();
                     Console.WriteLine("Press enter to return");
                     Console.ReadLine();
                     return true;
 
                 case "6":
                     Console.WriteLine("Insert the wind speed: ");
-                    cityWeatherBase.FindByWindSpeed(Convert.ToInt32(Console.ReadLine()));
+                    threads[0] = new Thread(() => cityWeatherBase.FindByWindSpeed(Convert.ToInt32(Console.ReadLine())));
+                    threads[0].Start();
+                    threads[0].Join();
                     Console.WriteLine("Press enter to return");
                     Console.ReadLine();
                     return true;
